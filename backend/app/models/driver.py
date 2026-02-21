@@ -9,5 +9,6 @@ class Driver(SQLModel, table=True):
     license_category: str
     license_expiry: date
     status: str = "available"  # available | on_trip | off_duty | suspended
-    safety_score: float = 100
-    trip_completed: int = 0
+    safety_score: Optional[float] = Field(default=100)
+    risk_level: str = Field(default="Low")  # Low | Medium | High
+    trip_completed: int = Field(default=0)

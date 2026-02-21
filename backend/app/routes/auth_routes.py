@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Form
 from sqlmodel import Session, select
-from passlib.context import CryptContext
+ 
 from app.db import get_session
 from app.models.user import User
+import bcrypt
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ------------------------
 # Register
@@ -24,7 +24,10 @@ def register(
 
     user = User(
         email=email,
-        password_hash=pwd_context.hash(password),
+        password_hash=bcrypt.hashpw(
+            password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8"),
         role=role
     )
 
@@ -46,7 +49,10 @@ def login(
 ):
     user = session.exec(select(User).where(User.email == email)).first()
 
-    if not user or not pwd_context.verify(password, user.password_hash):
+    if not user or not bcrypt.checkpw(
+        password.encode("utf-8"),
+        user.password_hash.encode("utf-8")
+    ):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     request.session["user_id"] = user.id
