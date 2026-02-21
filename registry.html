@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetFlow | Vehicle Registry</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fa-solid fa-truck-fast"></i> <span>FleetFlow</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fa-solid fa-gauge"></i> Command Center</a></li>
+                    <li class="active"><a href="registry.html"><i class="fa-solid fa-truck"></i> Vehicle Registry</a>
+                    </li>
+                    <li><a href="dispatcher.html"><i class="fa-solid fa-route"></i> Trip Dispatcher</a></li>
+                    <li><a href="maintenance.html"><i class="fa-solid fa-wrench"></i> Maintenance Logs</a></li>
+                    <li><a href="fuel.html"><i class="fa-solid fa-gas-pump"></i> Fuel & Expenses</a></li>
+                    <li><a href="drivers.html"><i class="fa-solid fa-id-card"></i> Driver Profiles</a></li>
+                    <li><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+                    <li class="logout"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Vehicle Registry</h1>
+                <div class="user-profile">
+                    <span>Manager</span>
+                    <div class="avatar">M</div>
+                </div>
+            </header>
+
+            <section class="dashboard">
+
+                <div class="card" style="margin-bottom: 30px; display: block;">
+                    <div class="section-header">
+                        <h2>Add New Asset</h2>
+                    </div>
+                    <form id="vehicle-form"
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Vehicle Model</label>
+                            <input type="text" id="v-model" placeholder="e.g. Ford Transit" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">License Plate (ID)</label>
+                            <input type="text" id="v-plate" placeholder="e.g. TRK-001" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Max Capacity (kg)</label>
+                            <input type="number" id="v-cap" placeholder="e.g. 1500" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <button type="submit"
+                            style="background: var(--accent-orange); color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            <i class="fa-solid fa-plus"></i> Add Vehicle
+                        </button>
+                    </form>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="section-header">
+                        <h2>Current Fleet Assets</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>License Plate</th>
+                                    <th>Model</th>
+                                    <th>Capacity</th>
+                                    <th>Odometer</th>
+                                    <th>Service Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="registry-data">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // 1. Initial Data (Mock Database)
+            let vehicles = [{
+                    plate: "VAN-05",
+                    model: "Ford Transit",
+                    cap: 800,
+                    odo: 12000,
+                    status: "Active"
+                },
+                {
+                    plate: "TRK-09",
+                    model: "Volvo FH16",
+                    cap: 5000,
+                    odo: 45000,
+                    status: "In Shop"
+                }
+            ];
+
+            const form = document.getElementById('vehicle-form');
+            const tableBody = document.getElementById('registry-table-body');
+
+            // 2. Function to Render Table
+            function renderRegistry() {
+                tableBody.innerHTML = "";
+                vehicles.forEach((v, index) => {
+                    const row = document.createElement('tr');
+
+                    // Logic for "Out of Service" toggle styling
+                    let statusColor = v.status === "Active" ? "color: var(--success);" :
+                        "color: var(--danger); font-weight:bold;";
+
+                    row.innerHTML = `
+                        <td><strong>${v.plate}</strong></td>
+                        <td>${v.model}</td>
+                        <td>${v.cap} kg</td>
+                        <td>${v.odo} km</td>
+                        <td style="${statusColor}">${v.status}</td>
+                        <td>
+                            <button onclick="toggleStatus(${index})" style="padding: 5px 10px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 3px;">
+                                ${v.status === "Active" ? "Retire" : "Activate"}
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            // 3. Handle Form Submit (Add New Vehicle) 
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Get values
+                const newVehicle = {
+                    plate: document.getElementById('v-plate').value.toUpperCase(),
+                    model: document.getElementById('v-model').value,
+                    cap: document.getElementById('v-cap').value,
+                    odo: 0, // Default for new car
+                    status: "Active"
+                };
+
+                vehicles.push(newVehicle); // Add to list
+                renderRegistry(); // Refresh table
+                form.reset(); // Clear form
+            });
+
+            // 4. Toggle Status Function (Global scope needed for onclick)
+            window.toggleStatus = (index) => {
+                if (vehicles[index].status === "Active") {
+                    vehicles[index].status = "Retired"; // 
+                } else {
+                    vehicles[index].status = "Active";
+                }
+                renderRegistry();
+            };
+
+            // Initial Render
+            renderRegistry();
+        });
+    </script>
+    <script>
+        // --- MOCK API: VEHICLE DATA ---
+        const vehicleData = [{
+                id: "V-101",
+                type: "Truck 10T",
+                plate: "KA-01-HH-1234",
+                status: "Active",
+                fuel: "85%"
+            },
+            {
+                id: "V-102",
+                type: "Van 2T",
+                plate: "TN-09-BE-5678",
+                status: "Maintenance",
+                fuel: "12%"
+            },
+            {
+                id: "V-103",
+                type: "Truck 10T",
+                plate: "MH-12-AP-9012",
+                status: "Active",
+                fuel: "60%"
+            },
+            {
+                id: "V-104",
+                type: "Lorry 15T",
+                plate: "DL-04-XY-3456",
+                status: "Idle",
+                fuel: "95%"
+            }
+        ];
+
+        // --- RENDER FUNCTION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('registry-data');
+            // Clear any existing content
+            tableBody.innerHTML = '';
+
+            vehicleData.forEach(vehicle => {
+                const row = `
+                <tr>
+                    <td>${vehicle.id}</td>
+                    <td>${vehicle.type}</td>
+                    <td>${vehicle.plate}</td>
+                    <td><span class="status ${vehicle.status.toLowerCase()}">${vehicle.status}</span></td>
+                    <td>
+                        <div class="progress-bar" style="background:#eee; height:8px; border-radius:4px; width:100px; display:inline-block; margin-right:10px;">
+                            <div class="fill" style="width:${vehicle.fuel}; background:#f39c12; height:100%; border-radius:4px;"></div>
+                        </div>
+                        ${vehicle.fuel}
+                    </td>
+                </tr>
+            `;
+                tableBody.innerHTML += row;
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+
+            // 1. SELECT ELEMENTS
+            const userLabel = document.querySelector('.user-profile span');
+            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
+
+            // 2. UPDATE HEADER TEXT & AVATAR
+            if (role) {
+                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
+                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
+            }
+
+            // 3. HIDE MENU ITEMS (Dispatcher Logic)
+            if (role === 'Dispatcher') {
+                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
+
+                sidebarItems.forEach(item => {
+                    const text = item.innerText.trim();
+                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
+
+                    if (!allowed.includes(text)) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

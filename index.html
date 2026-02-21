@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetFlow | Command Center</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fa-solid fa-truck-fast"></i> <span>FleetFlow</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active"><a href="#"><i class="fa-solid fa-gauge"></i> Command Center</a></li>
+                    <li><a href="registry.html"><i class="fa-solid fa-truck"></i> Vehicle Registry</a></li>
+                    <li><a href="dispatcher.html"><i class="fa-solid fa-route"></i> Trip Dispatcher</a></li>
+                    <li><a href="maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance Logs</a>
+                    </li>
+                    <li><a href="fuel.html"><i class="fa-solid fa-gas-pump"></i> Fuel & Expenses</a></li>
+                    <li><a href="drivers.html"><i class="fa-solid fa-id-card"></i> Driver Profiles</a></li>
+                    <li><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+
+                    <li class="logout"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Command Center</h1>
+                <div class="user-profile">
+                    <span>Manager</span>
+                    <div class="avatar">M</div>
+                </div>
+            </header>
+
+            <section class="dashboard">
+
+                <div class="kpi-grid">
+
+                    <div class="card">
+                        <div class="kpi-info">
+                            <h3>Active Fleet</h3>
+                            <p class="big-number">12</p>
+                            <span class="sub-text">Vehicles "On Trip"</span>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fa-solid fa-road"></i>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="kpi-info">
+                            <h3>Maintenance</h3>
+                            <p class="big-number warning">3</p>
+                            <span class="sub-text">Vehicles "In Shop"</span>
+                        </div>
+                        <div class="icon-box warning">
+                            <i class="fa-solid fa-screwdriver-wrench"></i>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="kpi-info">
+                            <h3>Utilization</h3>
+                            <p class="big-number">85%</p>
+                            <span class="sub-text">Assigned vs. Idle</span>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="kpi-info">
+                            <h3>Pending Cargo</h3>
+                            <p class="big-number">8</p>
+                            <span class="sub-text">Waiting assignment</span>
+                        </div>
+                        <div class="icon-box">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="section-header">
+                        <h2>Live Fleet Status</h2>
+
+                        <select class="filter-dropdown">
+                            <option value="all">All Vehicles</option>
+                            <option value="truck">Trucks</option>
+                            <option value="van">Vans</option>
+                            <option value="bike">Bikes</option>
+                        </select>
+                    </div>
+
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Vehicle ID</th>
+                                    <th>Driver</th>
+                                    <th>Status</th>
+                                    <th>Destination</th>
+                                    <th>ETA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fleet-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+
+            // 1. SELECT ELEMENTS
+            const userLabel = document.querySelector('.user-profile span');
+            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
+
+            // 2. UPDATE HEADER TEXT & AVATAR
+            if (role) {
+                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
+                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
+            }
+
+            // 3. HIDE MENU ITEMS (Dispatcher Logic)
+            if (role === 'Dispatcher') {
+                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
+
+                sidebarItems.forEach(item => {
+                    const text = item.innerText.trim();
+                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
+
+                    if (!allowed.includes(text)) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

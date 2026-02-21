@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetFlow | Maintenance Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fa-solid fa-truck-fast"></i> <span>FleetFlow</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fa-solid fa-gauge"></i> Command Center</a></li>
+                    <li><a href="registry.html"><i class="fa-solid fa-truck"></i> Vehicle Registry</a></li>
+                    <li><a href="dispatcher.html"><i class="fa-solid fa-route"></i> Trip Dispatcher</a></li>
+                    <li class="active"><a href="maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i>
+                            Maintenance Logs</a></li>
+                    <li><a href="fuel.html"><i class="fa-solid fa-gas-pump"></i> Fuel & Expenses</a></li>
+                    <li><a href="drivers.html"><i class="fa-solid fa-id-card"></i> Driver Profiles</a></li>
+                    <li><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+                    <li class="logout"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Maintenance Hub</h1>
+                <div class="user-profile">
+                    <span>Manager</span>
+                    <div class="avatar">M</div>
+                </div>
+            </header>
+
+            <section class="dashboard">
+
+                <div class="kpi-grid" style="margin-bottom: 20px;">
+                    <div class="card" style="border-left: 5px solid var(--danger);">
+                        <div class="kpi-info">
+                            <h3>Urgent Repairs</h3>
+                            <p class="big-number warning" id="urgent-count">0</p>
+                        </div>
+                        <div class="icon-box warning"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    </div>
+                    <div class="card" style="border-left: 5px solid var(--accent-orange);">
+                        <div class="kpi-info">
+                            <h3>Total Maint. Spend</h3>
+                            <p class="big-number" id="total-spend">$0</p>
+                        </div>
+                        <div class="icon-box"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                    </div>
+                </div>
+
+                <div class="card" style="display: block; margin-bottom: 30px;">
+                    <div class="section-header">
+                        <h2>Log Service / Repair</h2>
+                    </div>
+
+                    <form id="maint-form"
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Vehicle ID</label>
+                            <select id="maint-vehicle" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                <option value="VAN-05">VAN-05 (Ford Transit)</option>
+                                <option value="TRK-01">TRK-01 (Volvo FH16)</option>
+                                <option value="BIKE-22">BIKE-22 (Honda)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Service Type</label>
+                            <select id="maint-type" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                <option value="Routine">Oil Change / Routine</option>
+                                <option value="Tire">Tire Replacement</option>
+                                <option value="Engine">Engine Repair (Urgent)</option>
+                                <option value="Body">Body Work</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Cost ($)</label>
+                            <input type="number" id="maint-cost" placeholder="0.00" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <button type="submit"
+                            style="background: var(--danger); color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            <i class="fa-solid fa-ban"></i> Log & Lock Vehicle
+                        </button>
+                    </form>
+
+                    <div id="status-notify" style="margin-top: 15px; font-size: 0.9rem; color: #555; display:none;">
+                        <i class="fa-solid fa-check-circle" style="color: var(--success);"></i>
+                        <span id="notify-text">Vehicle locked.</span>
+                    </div>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="section-header">
+                        <h2>Service History</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Vehicle ID</th>
+                                    <th>Service Type</th>
+                                    <th>Cost</th>
+                                    <th>New Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="maintenance-data"></tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let totalCost = 0;
+            let urgentCount = 0;
+            const form = document.getElementById('maint-form');
+            const tableBody = document.getElementById('maint-table-body');
+            const notifyBox = document.getElementById('status-notify');
+            const notifyText = document.getElementById('notify-text');
+
+            // Handle Submit
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Get Values
+                const vehicle = document.getElementById('maint-vehicle').value;
+                const type = document.getElementById('maint-type').value;
+                const cost = parseFloat(document.getElementById('maint-cost').value);
+                const date = new Date().toLocaleDateString();
+
+                // 1. UPDATE KPIs (Financial Tracking) 
+                totalCost += cost;
+                document.getElementById('total-spend').textContent = "$" + totalCost.toLocaleString();
+
+                if (type === "Engine" || type === "Body") {
+                    urgentCount++;
+                    document.getElementById('urgent-count').textContent = urgentCount;
+                }
+
+                // 2. ADD TO TABLE
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td><strong>${vehicle}</strong></td>
+                    <td>${type}</td>
+                    <td>$${cost.toFixed(2)}</td>
+                    <td><span class="status-pill status-inshop">In Shop</span></td>
+                `;
+                // Add to top of list
+                tableBody.prepend(row);
+
+                // 3. SHOW THE "LOGIC LINK" NOTIFICATION 
+                // This simulates the backend removing the vehicle from the Dispatcher
+                notifyBox.style.display = "block";
+                notifyText.innerHTML =
+                    `<strong>${vehicle}</strong> status changed to <span class="status-pill status-inshop">In Shop</span>. Removed from Dispatcher.`;
+
+                // Reset form
+                form.reset();
+
+                // Hide notification after 3 seconds
+                setTimeout(() => {
+                    notifyBox.style.display = "none";
+                }, 4000);
+            });
+        });
+    </script>
+    <script>
+        // --- MOCK API: MAINTENANCE DATA ---
+        const maintenanceData = [{
+                id: "M-501",
+                vehicle: "V-102",
+                issue: "Engine Overheating",
+                date: "2026-02-20",
+                cost: "₹4,500",
+                status: "In Progress"
+            },
+            {
+                id: "M-502",
+                vehicle: "V-105",
+                issue: "Brake Pad Replacement",
+                date: "2026-02-18",
+                cost: "₹2,200",
+                status: "Completed"
+            },
+            {
+                id: "M-503",
+                vehicle: "V-101",
+                issue: "Oil Change",
+                date: "2026-02-25",
+                cost: "₹1,500",
+                status: "Scheduled"
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('maintenance-data');
+            tableBody.innerHTML = '';
+
+            maintenanceData.forEach(item => {
+                const row = `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.vehicle}</td>
+                    <td>${item.issue}</td>
+                    <td>${item.date}</td>
+                    <td>${item.cost}</td>
+                    <td><span class="status ${item.status.toLowerCase().replace(' ', '-')}">${item.status}</span></td>
+                </tr>
+            `;
+                tableBody.innerHTML += row;
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+
+            // 1. SELECT ELEMENTS
+            const userLabel = document.querySelector('.user-profile span');
+            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
+
+            // 2. UPDATE HEADER TEXT & AVATAR
+            if (role) {
+                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
+                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
+            }
+
+            // 3. HIDE MENU ITEMS (Dispatcher Logic)
+            if (role === 'Dispatcher') {
+                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
+
+                sidebarItems.forEach(item => {
+                    const text = item.innerText.trim();
+                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
+
+                    if (!allowed.includes(text)) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

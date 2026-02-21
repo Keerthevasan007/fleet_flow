@@ -1,0 +1,278 @@
+:root {
+    /* -- Theme Palette -- */
+    --bg-main: #ffffff;          /* Pure White Background */
+    --bg-panel: #ffffff;         /* White for cards/sidebar */
+    --text-primary: #000000;     /* Jet Black Text */
+    --text-secondary: #555555;   /* Dark Gray for subtitles */
+    --border-color: #e0e0e0;     /* Light gray for structure lines */
+    
+    /* -- The "Bit of Orange" -- */
+    --accent-orange: #ff6b00;    /* High-vis Logistics Orange */
+    --accent-light: #fff0e6;     /* Very faint orange for hovers */
+
+    /* -- Functional Colors -- */
+    --success: #27ae60;          /* Green for "On Trip" */
+    --danger: #e74c3c;           /* Red for Alerts */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', 'Roboto', Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- Sidebar: Clean White with Black Text --- */
+.sidebar {
+    width: 250px;
+    background-color: var(--bg-panel);
+    color: var(--text-primary);
+    border-right: 1px solid var(--border-color); /* Separator line */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar .logo {
+    padding: 25px;
+    /* Orange logo icon for branding */
+    color: var(--accent-orange); 
+    font-weight: 800;
+    font-size: 1.2rem;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 1px;
+}
+
+.sidebar .logo span {
+    color: var(--text-primary); /* "FleetFlow" text is black */
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding-top: 20px;
+}
+
+.sidebar nav ul li a {
+    display: block;
+    padding: 15px 25px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Hover State */
+.sidebar nav ul li a:hover {
+    background-color: var(--accent-light);
+    color: var(--accent-orange);
+}
+
+/* Active State: The "Orange Bit" */
+.sidebar nav ul li.active a {
+    background-color: var(--bg-panel);
+    color: var(--accent-orange);
+    border-right: 4px solid var(--accent-orange); /* Orange marker on right */
+    font-weight: 700;
+}
+
+.sidebar .logout {
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+}
+
+.sidebar .logout a {
+    color: var(--danger); /* Make logout red */
+}
+
+/* --- Main Content --- */
+.main-content {
+    flex: 1;
+    padding: 30px;
+    background-color: #fafafa; /* Extremely light gray to distinguish from white cards */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: 600;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--text-primary); /* Black Circle */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- KPI Cards --- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: var(--bg-panel);
+    padding: 25px;
+    border-radius: 6px;
+    /* Clean border instead of shadow */
+    border: 1px solid var(--border-color); 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    border-color: var(--accent-orange); /* Orange border on hover */
+    transform: translateY(-2px);
+}
+
+.kpi-info h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.big-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.sub-text {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* Icons in Cards */
+.icon-box {
+    width: 50px;
+    height: 50px;
+    background-color: var(--accent-light); /* Faint Orange Background */
+    color: var(--accent-orange);           /* Orange Icon */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+}
+
+/* Override for specific card logic if needed, 
+   but keeping them all orange unifies the theme */
+.icon-box.warning {
+    background-color: #fff4e5;
+    color: var(--danger);
+}
+
+/* --- Table Styles --- */
+.recent-activity {
+    background: var(--bg-panel);
+    padding: 25px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 1.2rem;
+    border-left: 4px solid var(--accent-orange); /* Orange accent mark */
+    padding-left: 10px;
+}
+
+.filter-dropdown {
+    padding: 8px 15px;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--text-primary);
+    border-radius: 4px;
+    outline: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 15px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border-color);
+}
+
+td {
+    padding: 15px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+/* Status Pills */
+.status-pill {
+    padding: 6px 12px;
+    border-radius: 4px; /* Square edges for industrial look */
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-ontrip {
+    background-color: #e8f5e9;
+    color: var(--success);
+    border: 1px solid #c8e6c9;
+}
+
+.status-inshop {
+    background-color: var(--accent-light);
+    color: var(--accent-orange);
+    border: 1px solid #ffe0b2;
+}
+
+.status-idle {
+    background-color: #f5f5f5;
+    color: #7f8c8d;
+    border: 1px solid #e0e0e0;
+}

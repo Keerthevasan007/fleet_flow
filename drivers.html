@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetFlow | Driver Profiles</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fa-solid fa-truck-fast"></i> <span>FleetFlow</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fa-solid fa-gauge"></i> Command Center</a></li>
+                    <li><a href="registry.html"><i class="fa-solid fa-truck"></i> Vehicle Registry</a></li>
+                    <li><a href="dispatcher.html"><i class="fa-solid fa-route"></i> Trip Dispatcher</a></li>
+                    <li><a href="maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance Logs</a>
+                    </li>
+                    <li><a href="fuel.html"><i class="fa-solid fa-gas-pump"></i> Fuel & Expenses</a></li>
+                    <li class="active"><a href="drivers.html"><i class="fa-solid fa-id-card"></i> Driver Profiles</a>
+                    </li>
+                    <li><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+                    <li class="logout"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Driver Profiles</h1>
+                <div class="user-profile">
+                    <span>Manager</span>
+                    <div class="avatar">M</div>
+                </div>
+            </header>
+
+            <section class="dashboard">
+                <div class="card" style="display: block; margin-bottom: 30px;">
+                    <div class="section-header">
+                        <h2>Register New Driver</h2>
+                    </div>
+                    <form id="driver-form"
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Full Name</label>
+                            <input type="text" id="d-name" placeholder="e.g. John Doe" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">License ID</label>
+                            <input type="text" id="d-license" placeholder="DL-123456" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">License Expiry Date</label>
+                            <input type="date" id="d-expiry" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+                        <button type="submit"
+                            style="background: var(--accent-orange); color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            <i class="fa-solid fa-user-plus"></i> Add Driver
+                        </button>
+                    </form>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="section-header">
+                        <h2>Active Personnel</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Driver Name</th>
+                                    <th>License ID</th>
+                                    <th>Expiry Date</th>
+                                    <th>Compliance Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drivers-data"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            let drivers = [{
+                    name: "Alex Johnson",
+                    id: "DL-998877",
+                    expiry: "2026-12-31",
+                    status: "Active"
+                },
+                {
+                    name: "Sarah Connor",
+                    id: "DL-554433",
+                    expiry: "2024-01-01",
+                    status: "Suspended"
+                }
+            ];
+            const form = document.getElementById('driver-form');
+            const tableBody = document.getElementById('driver-table-body');
+
+            function renderDrivers() {
+                tableBody.innerHTML = "";
+                const today = new Date();
+                drivers.forEach((d, index) => {
+                    const row = document.createElement('tr');
+                    const expiryDate = new Date(d.expiry);
+                    let isExpired = expiryDate < today;
+                    let statusClass = (isExpired || d.status === "Suspended") ? "status-inshop" :
+                        "status-ontrip";
+                    let statusText = (isExpired || d.status === "Suspended") ? "Expired / Suspended" :
+                        "Valid";
+
+                    row.innerHTML = `
+                        <td><strong>${d.name}</strong></td>
+                        <td>${d.id}</td>
+                        <td style="${isExpired ? 'color: var(--danger); font-weight:bold;' : ''}">${d.expiry}</td>
+                        <td><span class="status-pill ${statusClass}">${statusText}</span></td>
+                        <td><button onclick="toggleDriver(${index})" style="padding: 5px 10px; cursor: pointer; background: #eee; border: 1px solid #ccc; border-radius: 3px;">${d.status === "Active" ? "Suspend" : "Re-activate"}</button></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                drivers.push({
+                    name: document.getElementById('d-name').value,
+                    id: document.getElementById('d-license').value,
+                    expiry: document.getElementById('d-expiry').value,
+                    status: "Active"
+                });
+                renderDrivers();
+                form.reset();
+            });
+
+            window.toggleDriver = (index) => {
+                drivers[index].status = drivers[index].status === "Active" ? "Suspended" : "Active";
+                renderDrivers();
+            };
+            renderDrivers();
+        });
+    </script>
+    <script>
+        // --- MOCK API: DRIVER DATA ---
+        const driverData = [{
+                id: "D-001",
+                name: "Rajesh Kumar",
+                license: "HGM-892",
+                phone: "+91 98765 43210",
+                status: "On Trip"
+            },
+            {
+                id: "D-002",
+                name: "Sarah Lee",
+                license: "XYW-456",
+                phone: "+91 87654 32109",
+                status: "Available"
+            },
+            {
+                id: "D-003",
+                name: "Amit Singh",
+                license: "BGT-102",
+                phone: "+91 76543 21098",
+                status: "On Leave"
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tableBody = document.getElementById('drivers-data');
+            tableBody.innerHTML = '';
+
+            driverData.forEach(driver => {
+                // Generate initials for avatar (e.g., Rajesh Kumar -> R)
+                const initial = driver.name.charAt(0);
+
+                const row = `
+                <tr>
+                    <td>${driver.id}</td>
+                    <td>
+                        <div class="user-profile" style="display:flex; align-items:center; gap:10px;">
+                            <div class="avatar" style="width:30px; height:30px; background:#333; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:12px;">${initial}</div>
+                            ${driver.name}
+                        </div>
+                    </td>
+                    <td>${driver.license}</td>
+                    <td>${driver.phone}</td>
+                    <td><span class="status ${driver.status.toLowerCase().replace(' ', '-')}">${driver.status}</span></td>
+                </tr>
+            `;
+                tableBody.innerHTML += row;
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+
+            // 1. SELECT ELEMENTS
+            const userLabel = document.querySelector('.user-profile span');
+            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
+
+            // 2. UPDATE HEADER TEXT & AVATAR
+            if (role) {
+                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
+                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
+            }
+
+            // 3. HIDE MENU ITEMS (Dispatcher Logic)
+            if (role === 'Dispatcher') {
+                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
+
+                sidebarItems.forEach(item => {
+                    const text = item.innerText.trim();
+                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
+
+                    if (!allowed.includes(text)) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetFlow | Fuel Logs</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fa-solid fa-truck-fast"></i> <span>FleetFlow</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fa-solid fa-gauge"></i> Command Center</a></li>
+                    <li><a href="registry.html"><i class="fa-solid fa-truck"></i> Vehicle Registry</a></li>
+                    <li><a href="dispatcher.html"><i class="fa-solid fa-route"></i> Trip Dispatcher</a></li>
+                    <li><a href="maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance Logs</a>
+                    </li>
+                    <li class="active"><a href="fuel.html"><i class="fa-solid fa-gas-pump"></i> Fuel & Expenses</a></li>
+                    <li><a href="drivers.html"><i class="fa-solid fa-id-card"></i> Driver Profiles</a></li>
+                    <li><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a></li>
+                    <li class="logout"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Fuel & Expenses</h1>
+                <div class="user-profile">
+                    <span>Manager</span>
+                    <div class="avatar">M</div>
+                </div>
+            </header>
+
+            <section class="dashboard">
+
+                <div class="kpi-grid" style="margin-bottom: 20px;">
+                    <div class="card">
+                        <div class="kpi-info">
+                            <h3>Total Fuel Spend</h3>
+                            <p class="big-number" id="total-fuel-cost">$0</p>
+                            <span class="sub-text">Current Month</span>
+                        </div>
+                        <div class="icon-box"><i class="fa-solid fa-droplet"></i></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="kpi-info">
+                            <h3>Avg. Fleet Efficiency</h3>
+                            <p class="big-number">8.5</p>
+                            <span class="sub-text">km / L</span>
+                        </div>
+                        <div class="icon-box"><i class="fa-solid fa-leaf"></i></div>
+                    </div>
+                </div>
+
+                <div class="card" style="display: block; margin-bottom: 30px;">
+                    <div class="section-header">
+                        <h2>Log Fuel Refill</h2>
+                    </div>
+
+                    <form id="fuel-form"
+                        style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 15px; align-items: end;">
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Vehicle ID</label>
+                            <select id="fuel-vehicle" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                                <option value="VAN-05">VAN-05</option>
+                                <option value="TRK-01">TRK-01</option>
+                                <option value="BIKE-22">BIKE-22</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Liters Added</label>
+                            <input type="number" id="fuel-liters" placeholder="e.g. 50" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Total Cost ($)</label>
+                            <input type="number" id="fuel-cost" placeholder="e.g. 100" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <div>
+                            <label style="font-size: 0.85rem; color: #555;">Current Odometer</label>
+                            <input type="number" id="fuel-odo" placeholder="km" required
+                                style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                        </div>
+
+                        <button type="submit"
+                            style="background: var(--accent-orange); color: white; border: none; padding: 12px 20px; border-radius: 4px; font-weight: bold; cursor: pointer;">
+                            <i class="fa-solid fa-save"></i> Save Log
+                        </button>
+                    </form>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="section-header">
+                        <h2>Expense Logs</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Vehicle ID</th>
+                                    <th>Liters</th>
+                                    <th>Cost</th>
+                                    <th>Efficiency (Est.)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fuel-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let totalFuelSpend = 0;
+            const form = document.getElementById('fuel-form');
+            const tableBody = document.getElementById('fuel-table-body');
+            const totalDisplay = document.getElementById('total-fuel-cost');
+
+            // Handle Submit
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                // Get Values
+                const vehicle = document.getElementById('fuel-vehicle').value;
+                const liters = parseFloat(document.getElementById('fuel-liters').value);
+                const cost = parseFloat(document.getElementById('fuel-cost').value);
+                const odo = document.getElementById('fuel-odo').value;
+                const date = new Date().toLocaleDateString();
+
+                // 1. UPDATE TOTAL SPEND KPI
+                totalFuelSpend += cost;
+                totalDisplay.textContent = "$" + totalFuelSpend.toLocaleString();
+
+                // 2. CALCULATE EFFICIENCY (Mock Logic)
+                // Real logic requires (CurrentOdo - PreviousOdo) / Liters. 
+                // For this demo, we'll simulate a random "Trip Distance" of 300km to show the math.
+                const simulatedTrip = 300;
+                const efficiency = (simulatedTrip / liters).toFixed(1);
+
+                // Color Code: Low efficiency = Red
+                let effColor = "color: var(--success);";
+                if (efficiency < 5) effColor = "color: var(--danger); font-weight: bold;";
+
+                // 3. ADD TO TABLE
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${date}</td>
+                    <td><strong>${vehicle}</strong></td>
+                    <td>${liters} L</td>
+                    <td>$${cost}</td>
+                    <td style="${effColor}">${efficiency} km/L</td>
+                `;
+                tableBody.prepend(row);
+
+                form.reset();
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+
+            // 1. SELECT ELEMENTS
+            const userLabel = document.querySelector('.user-profile span');
+            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
+
+            // 2. UPDATE HEADER TEXT & AVATAR
+            if (role) {
+                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
+                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
+            }
+
+            // 3. HIDE MENU ITEMS (Dispatcher Logic)
+            if (role === 'Dispatcher') {
+                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
+
+                sidebarItems.forEach(item => {
+                    const text = item.innerText.trim();
+                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
+
+                    if (!allowed.includes(text)) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
