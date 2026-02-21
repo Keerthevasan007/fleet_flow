@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from sqlmodel import SQLModel
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+import bcrypt
+from sqlmodel import Session, select
 
 from app.db import engine
 
@@ -11,6 +15,7 @@ from app.models.driver import Driver
 from app.models.trip import Trip
 from app.models.maintenance import Maintenance
 from app.models.fuel import Fuel
+from app.models.user import User
 
 # Import ALL routers
 from app.routes.vehicle_routes import router as vehicle_router
@@ -39,6 +44,28 @@ app.add_middleware(
 @app.on_event("startup")
 def on_startup():
     SQLModel.metadata.create_all(engine)
+
+    # Seed demo users (used by the frontend login page)
+    with Session(engine) as session:
+        demo_users = [
+            ("admin@fleetflow.com", "admin123", "manager"),
+            ("dispatch@fleetflow.com", "user123", "dispatcher"),
+        ]
+
+        for email, password, role in demo_users:
+            existing = session.exec(select(User).where(User.email == email)).first()
+            if existing:
+                continue
+
+            password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+            session.add(User(email=email, password_hash=password_hash, role=role))
+
+        session.commit()
+
+
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+if frontend_dir.exists():
+    app.mount("/ui", StaticFiles(directory=str(frontend_dir), html=True), name="ui")
 
 app.include_router(vehicle_router)
 app.include_router(driver_router)

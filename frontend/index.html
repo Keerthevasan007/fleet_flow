@@ -123,35 +123,6 @@
     </div>
 
     <script src="script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const role = localStorage.getItem('userRole');
-
-            // 1. SELECT ELEMENTS
-            const userLabel = document.querySelector('.user-profile span');
-            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
-
-            // 2. UPDATE HEADER TEXT & AVATAR
-            if (role) {
-                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
-                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
-            }
-
-            // 3. HIDE MENU ITEMS (Dispatcher Logic)
-            if (role === 'Dispatcher') {
-                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
-
-                sidebarItems.forEach(item => {
-                    const text = item.innerText.trim();
-                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
-
-                    if (!allowed.includes(text)) {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>

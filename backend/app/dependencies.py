@@ -1,4 +1,4 @@
-from fastapi import Request, HTTPException, Depends
+from fastapi import Request, HTTPException
 
 def require_login(request: Request):
     if not request.session.get("user_id"):

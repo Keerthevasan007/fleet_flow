@@ -34,6 +34,8 @@ def create_trip(trip: Trip, session: Session = Depends(get_session)):
     if trip.cargo_weight > vehicle.max_capacity:
         raise HTTPException(400, "Cargo exceeds vehicle capacity")
 
+    trip.status = "dispatched"
+
     vehicle.status = "on_trip"
     driver.status = "on_trip"
 

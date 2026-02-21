@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from app.db import get_session
 from app.models.vehicle import Vehicle
 from fastapi import Depends
-from app.dependencies import require_manager
+from app.dependencies import require_manager, require_dispatcher_or_manager
 from sqlmodel import select
 from app.models.trip import Trip
 from app.models.fuel import Fuel
@@ -17,11 +17,11 @@ def create_vehicle(vehicle: Vehicle, session: Session = Depends(get_session)):
     session.refresh(vehicle)
     return vehicle
 
-@router.get("/", dependencies=[Depends(require_manager)])
+@router.get("/", dependencies=[Depends(require_dispatcher_or_manager)])
 def get_vehicles(session: Session = Depends(get_session)):
     return session.exec(select(Vehicle)).all()
 
-@router.get("/available", dependencies=[Depends(require_manager)])
+@router.get("/available", dependencies=[Depends(require_dispatcher_or_manager)])
 def get_available_vehicles(session: Session = Depends(get_session)):
     return session.exec(
         select(Vehicle).where(Vehicle.status == "available")

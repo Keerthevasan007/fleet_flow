@@ -137,43 +137,7 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- THE LOGOUT LOGIC ---
-            // As soon as this page loads, we wipe the memory.
-            localStorage.clear();
-            console.log("Session cleared. User is logged out.");
-
-            const form = document.getElementById('login-form');
-            const errorMsg = document.getElementById('error-msg');
-
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value.trim();
-
-                // Manager Login
-                if (email === "admin@fleetflow.com" && password === "admin123") {
-                    localStorage.setItem('userRole', 'Manager');
-                    window.location.href = "index.html";
-                }
-                // Dispatcher Login
-                else if (email === "dispatch@fleetflow.com" && password === "user123") {
-                    localStorage.setItem('userRole', 'Dispatcher');
-                    window.location.href = "dispatcher.html";
-                }
-                // Login Failed
-                else {
-                    errorMsg.style.display = "block";
-                    // Shake animation for error
-                    const card = document.querySelector('.login-card');
-                    card.style.transform = "translateX(10px)";
-                    setTimeout(() => card.style.transform = "translateX(0)", 100);
-                }
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>

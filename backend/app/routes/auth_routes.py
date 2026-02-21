@@ -71,3 +71,17 @@ def login(
 def logout(request: Request):
     request.session.clear()
     return {"message": "Logged out successfully"}
+
+
+# ------------------------
+# Current session
+# ------------------------
+@router.get("/me")
+def me(request: Request):
+    user_id = request.session.get("user_id")
+    role = request.session.get("role")
+
+    if not user_id or not role:
+        raise HTTPException(status_code=401, detail="Login required")
+
+    return {"user_id": user_id, "role": role}
