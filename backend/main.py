@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from sqlmodel import SQLModel
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.db import engine
 
@@ -18,6 +19,7 @@ from app.routes.trip_routes import router as trip_router
 from app.routes.maintenance_routes import router as maintenance_router
 from app.routes.fuel_routes import router as fuel_router
 from app.routes.analytics_routes import router as analytics_router
+from app.routes.auth_routes import router as auth_router
 
 app = FastAPI(title="Fleet Lifecycle Management System")
 
@@ -27,6 +29,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key="supersecretkey"
 )
 
 @app.on_event("startup")
@@ -39,6 +46,7 @@ app.include_router(trip_router)
 app.include_router(maintenance_router)
 app.include_router(fuel_router)
 app.include_router(analytics_router)
+app.include_router(auth_router)
 
 @app.get("/")
 def root():

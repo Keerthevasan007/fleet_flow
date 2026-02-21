@@ -5,13 +5,14 @@ from app.db import get_session
 from app.models.trip import Trip
 from app.models.vehicle import Vehicle
 from app.models.driver import Driver
+from app.dependencies import require_dispatcher_or_manager
 
 router = APIRouter(prefix="/trips", tags=["Trip Management"])
 
 # =============================
 # CREATE TRIP
 # =============================
-@router.post("/")
+@router.post("/", dependencies=[Depends(require_dispatcher_or_manager)])
 def create_trip(trip: Trip, session: Session = Depends(get_session)):
 
     vehicle = session.get(Vehicle, trip.vehicle_id)
@@ -45,7 +46,7 @@ def create_trip(trip: Trip, session: Session = Depends(get_session)):
 # =============================
 # COMPLETE TRIP
 # =============================
-@router.patch("/{trip_id}/complete")
+@router.patch("/{trip_id}/complete", dependencies=[Depends(require_dispatcher_or_manager)])
 def complete_trip(trip_id: int, end_odometer: float, revenue: float,
                   session: Session = Depends(get_session)):
 
@@ -77,7 +78,7 @@ def complete_trip(trip_id: int, end_odometer: float, revenue: float,
 # =============================
 # CANCEL TRIP
 # =============================
-@router.patch("/{trip_id}/cancel")
+@router.patch("/{trip_id}/cancel", dependencies=[Depends(require_dispatcher_or_manager)])
 def cancel_trip(trip_id: int, session: Session = Depends(get_session)):
 
     trip = session.get(Trip, trip_id)
@@ -103,6 +104,6 @@ def cancel_trip(trip_id: int, session: Session = Depends(get_session)):
 # =============================
 # LIST TRIPS
 # =============================
-@router.get("/")
+@router.get("/", dependencies=[Depends(require_dispatcher_or_manager)])
 def get_trips(session: Session = Depends(get_session)):
     return session.query(Trip).all()

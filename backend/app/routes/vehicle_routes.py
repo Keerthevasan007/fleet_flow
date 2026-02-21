@@ -2,27 +2,29 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from app.db import get_session
 from app.models.vehicle import Vehicle
+from fastapi import Depends
+from app.dependencies import require_manager
 
 router = APIRouter(prefix="/vehicles", tags=["Vehicle Registry"])
 
-@router.post("/")
+@router.post("/", dependencies=[Depends(require_manager)])
 def create_vehicle(vehicle: Vehicle, session: Session = Depends(get_session)):
     session.add(vehicle)
     session.commit()
     session.refresh(vehicle)
     return vehicle
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(require_manager)])
 def get_vehicles(session: Session = Depends(get_session)):
     return session.exec(select(Vehicle)).all()
 
-@router.get("/available")
+@router.get("/available", dependencies=[Depends(require_manager)])
 def get_available_vehicles(session: Session = Depends(get_session)):
     return session.exec(
         select(Vehicle).where(Vehicle.status == "available")
     ).all()
 
-@router.patch("/{vehicle_id}/retire")
+@router.patch("/{vehicle_id}/retire", dependencies=[Depends(require_manager)])
 def retire_vehicle(vehicle_id: int, session: Session = Depends(get_session)):
     vehicle = session.get(Vehicle, vehicle_id)
     if not vehicle:
