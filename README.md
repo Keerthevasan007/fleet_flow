@@ -177,10 +177,9 @@ Foreign keys ensure data integrity across operational and financial data.
 
 
 # 🚀 Local Setup Instructions
-
+```
 ## 1️⃣ Clone Repository
 
-```bash
 git clone https://github.com/Keerthevasan007/fleet_flow.git
 cd fleet_flow/backend
 
@@ -211,3 +210,4 @@ For rapid development, automatic schema generation is used.
 
 In production, schema migrations would be managed using Alembic for version control and safe database evolution.
 
+```
