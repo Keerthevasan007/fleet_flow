@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FleetFlow | Analytics</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="logo">
+                <h2><i class="fa-solid fa-truck-fast"></i> <span>FleetFlow</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html"><i class="fa-solid fa-gauge"></i> Command Center</a></li>
+                    <li><a href="registry.html"><i class="fa-solid fa-truck"></i> Vehicle Registry</a></li>
+                    <li><a href="dispatcher.html"><i class="fa-solid fa-route"></i> Trip Dispatcher</a></li>
+                    <li><a href="maintenance.html"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance Logs</a>
+                    </li>
+                    <li><a href="fuel.html"><i class="fa-solid fa-gas-pump"></i> Fuel & Expenses</a></li>
+                    <li><a href="drivers.html"><i class="fa-solid fa-id-card"></i> Driver Profiles</a></li>
+                    <li class="active"><a href="analytics.html"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+                    </li>
+                    <li class="logout"><a href="login.html"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <h1>Operational Analytics</h1>
+                <div class="user-profile"><span>Manager</span>
+                    <div class="avatar">M</div>
+                </div>
+            </header>
+
+            <section class="dashboard">
+                <div id="loading-spinner" style="text-align: center; padding: 50px; color: var(--text-secondary);">
+                    <i class="fa-solid fa-circle-notch fa-spin fa-3x"></i>
+                    <p style="margin-top: 15px;">Fetching live fleet data...</p>
+                </div>
+
+                <div id="analytics-content" style="display: none;">
+                    <div class="kpi-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 30px;">
+                        <div class="card" style="display: block;">
+                            <div class="section-header">
+                                <h2>Financial Performance (ROI)</h2>
+                            </div>
+                            <canvas id="financeChart"></canvas>
+                        </div>
+                        <div class="card" style="display: block;">
+                            <div class="section-header">
+                                <h2>Fleet Availability</h2>
+                            </div>
+                            <div style="position: relative; height: 250px;"><canvas id="statusChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            async function fetchAnalyticsData() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({
+                            financials: {
+                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                                revenue: [12000, 19000, 15000, 22000, 24000, 28000],
+                                costs: [8000, 10000, 9500, 11000, 13000, 14000]
+                            },
+                            fleetStatus: [12, 3, 5]
+                        });
+                    }, 1500);
+                });
+            }
+
+            async function initPage() {
+                const loader = document.getElementById('loading-spinner');
+                const content = document.getElementById('analytics-content');
+
+                // 1. Fetch Data
+                const data = await fetchAnalyticsData();
+
+                // 2. Hide Loader / Show Content
+                loader.style.display = 'none';
+                content.style.display = 'block';
+
+                // 3. Render Charts
+                renderCharts(data);
+
+                // --- ADD THIS SECTION TO UPDATE THE TEXT NUMBERS ---
+                // (This calculates the total revenue by adding up the months)
+                const totalRevenue = data.financials.revenue.reduce((a, b) => a + b, 0);
+                const totalCosts = data.financials.costs.reduce((a, b) => a + b, 0);
+
+                // Update the HTML elements (Make sure your HTML has these IDs!)
+                if (document.getElementById('kpi-revenue'))
+                    document.getElementById('kpi-revenue').innerText = "₹" + totalRevenue;
+
+                if (document.getElementById('kpi-fuel'))
+                    document.getElementById('kpi-fuel').innerText = "₹" + totalCosts;
+                // -----------------------------------------------------
+            }
+
+            function renderCharts(data) {
+                new Chart(document.getElementById('financeChart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.financials.labels,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: data.financials.revenue,
+                            backgroundColor: '#27ae60'
+                        }, {
+                            label: 'Costs',
+                            data: data.financials.costs,
+                            backgroundColor: '#e74c3c'
+                        }]
+                    }
+                });
+                new Chart(document.getElementById('statusChart').getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'In Shop', 'Idle'],
+                        datasets: [{
+                            data: data.fleetStatus,
+                            backgroundColor: ['#27ae60', '#ff6b00', '#95a5a6']
+                        }]
+                    }
+                });
+            }
+            initPage();
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const role = localStorage.getItem('userRole');
+
+            // 1. SELECT ELEMENTS
+            const userLabel = document.querySelector('.user-profile span');
+            const userAvatar = document.querySelector('.user-profile .avatar'); // New Selector!
+
+            // 2. UPDATE HEADER TEXT & AVATAR
+            if (role) {
+                if (userLabel) userLabel.textContent = role; // Change "Manager" -> "Dispatcher"
+                if (userAvatar) userAvatar.textContent = role.charAt(0); // Change "M" -> "D"
+            }
+
+            // 3. HIDE MENU ITEMS (Dispatcher Logic)
+            if (role === 'Dispatcher') {
+                const sidebarItems = document.querySelectorAll('.sidebar nav ul li');
+
+                sidebarItems.forEach(item => {
+                    const text = item.innerText.trim();
+                    const allowed = ["Command Center", "Trip Dispatcher", "Logout"];
+
+                    if (!allowed.includes(text)) {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
